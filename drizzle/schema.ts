@@ -1,17 +1,7 @@
 import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
-/**
- * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
- */
 export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
@@ -22,7 +12,29 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
+export const birthdayPages = mysqlTable("birthday_pages", {
+  id: int("id").autoincrement().primaryKey(),
+  slug: varchar("slug", { length: 64 }).notNull().unique(),
+  recipientName: varchar("recipientName", { length: 160 }).notNull().default("Big Sis"),
+  welcomeMessage: text("welcomeMessage"),
+  letterMessage: text("letterMessage"),
+  signoff: varchar("signoff", { length: 160 }).notNull().default("Your family"),
+  heroImageUrl: text("heroImageUrl"),
+  videoUrl: text("videoUrl"),
+  musicUrl: text("musicUrl"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const birthdayMedia = mysqlTable("birthday_media", {
+  id: int("id").autoincrement().primaryKey(),
+  pageId: int("pageId").notNull(),
+  url: text("url").notNull(),
+  caption: varchar("caption", { length: 255 }).notNull().default("A favorite memory"),
+  sortOrder: int("sortOrder").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
-
-// TODO: Add your tables here
+export type BirthdayPage = typeof birthdayPages.$inferSelect;
+export type BirthdayMedia = typeof birthdayMedia.$inferSelect;
